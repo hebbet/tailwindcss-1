@@ -10,6 +10,7 @@ import { createCompatConfig } from './config/create-compat-config'
 import { resolveConfig } from './config/resolve-config'
 import type { UserConfig } from './config/types'
 import { registerContainerCompat } from './container'
+import { registerContentCompat } from './content-compat'
 import { darkModePlugin } from './dark-mode'
 import { registerLegacyUtilities } from './legacy-utilities'
 import { buildPluginApi, type CssPluginOptions, type Plugin } from './plugin-api'
@@ -358,6 +359,7 @@ function upgradeToFullPluginSupport({
   registerThemeVariantOverrides(resolvedUserConfig, designSystem)
   registerScreensConfig(resolvedUserConfig, designSystem)
   registerContainerCompat(resolvedUserConfig, designSystem)
+  registerContentCompat(resolvedUserConfig, designSystem)
 
   // If a prefix has already been set in CSS don't override it
   if (!designSystem.theme.prefix && resolvedConfig.prefix) {

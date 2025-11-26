@@ -1917,6 +1917,11 @@ describe('border compatibility', () => {
           --tw-content: '//';
           content: var(--tw-content);
         }
+        @property --tw-content {
+          syntax: '*';
+          inherits: false;
+          initial-value: '';
+        }
         "
       `)
     },

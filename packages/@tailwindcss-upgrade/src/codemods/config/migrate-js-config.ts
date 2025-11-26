@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadModule } from '../../../../@tailwindcss-node/src/compile'
 import defaultTheme from '../../../../tailwindcss/dist/default-theme'
-import { atRule, toCss, type AstNode } from '../../../../tailwindcss/src/ast'
+import { atRule, decl, toCss, type AstNode } from '../../../../tailwindcss/src/ast'
 import {
   keyPathToCssProperty,
   themeableValues,
@@ -140,6 +140,29 @@ async function migrateTheme(
         css += '}\n' // @tw-bucket
       }
       delete resolvedConfig.theme.container
+    }
+
+    // We don't read from the `--content` key in v4 for the content-* utilities
+    // so we must convert these to custom utilities instead.
+    if ('content' in resolvedConfig.theme) {
+      let rules: AstNode[] = []
+
+      for (let [key, value] of Object.entries(resolvedConfig.theme.content)) {
+        rules.push(
+          atRule('@utility', `content-${key}`, [
+            decl('--tw-content', `${value}`),
+            decl('content', `var(--tw-content)`),
+          ]),
+        )
+      }
+
+      if (rules.length > 0) {
+        css += `\n@tw-bucket utility {\n`
+        css += toCss(rules)
+        css += '}\n' // @tw-bucket
+      }
+
+      delete resolvedConfig.theme.content
     }
 
     if ('aria' in resolvedConfig.theme) {

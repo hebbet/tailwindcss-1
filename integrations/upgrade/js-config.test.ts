@@ -1840,6 +1840,87 @@ describe('border compatibility', () => {
       `)
     },
   )
+
+  test(
+    'migrates `content` configurations',
+    {
+      fs: {
+        'package.json': json`
+          {
+            "dependencies": {
+              "tailwindcss": "^3",
+              "@tailwindcss/upgrade": "workspace:^"
+            }
+          }
+        `,
+        'tailwind.config.ts': ts`
+          import { type Config } from 'tailwindcss'
+
+          export default {
+            content: ['./src/**/*.html'],
+            theme: {
+              content: {
+                slash: '"/"',
+                slashslash: '"//"',
+              },
+            },
+          } satisfies Config
+        `,
+        'src/input.css': css`
+          @tailwind base;
+          @tailwind components;
+          @tailwind utilities;
+        `,
+        'src/index.html': html`
+          <div
+            class="after:content-slash hover:after:content-slashslash"
+          ></div>
+        `,
+      },
+    },
+    async ({ exec, fs, expect }) => {
+      await exec('npx @tailwindcss/upgrade')
+
+      expect(await fs.dumpFiles('src/**/*.{css,html}')).toMatchInlineSnapshot(`
+        "
+        --- src/index.html ---
+        <div
+          class="after:content-slash hover:after:content-slashslash"
+        ></div>
+
+        --- src/input.css ---
+        @import 'tailwindcss';
+
+        /*
+          The default border color has changed to \`currentcolor\` in Tailwind CSS v4,
+          so we've added these compatibility styles to make sure everything still
+          looks the same as it did with Tailwind CSS v3.
+
+          If we ever want to remove these styles, we need to add an explicit border
+          color utility to any element that depends on these defaults.
+        */
+        @layer base {
+          *,
+          ::after,
+          ::before,
+          ::backdrop,
+          ::file-selector-button {
+            border-color: var(--color-gray-200, currentcolor);
+          }
+        }
+
+        @utility content-slash {
+          --tw-content: '/';
+          content: var(--tw-content);
+        }
+        @utility content-slashslash {
+          --tw-content: '//';
+          content: var(--tw-content);
+        }
+        "
+      `)
+    },
+  )
 })
 
 test(

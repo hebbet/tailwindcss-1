@@ -144,10 +144,16 @@ async function migrateTheme(
 
     // We don't read from the `--content` key in v4 for the content-* utilities
     // so we must convert these to custom utilities instead.
-    if ('content' in resolvedConfig.theme) {
+    if (
+      'content' in resolvedConfig.theme &&
+      resolvedConfig.theme.content !== null &&
+      typeof resolvedConfig.theme.content === 'object'
+    ) {
       let rules: AstNode[] = []
 
       for (let [key, value] of Object.entries(resolvedConfig.theme.content)) {
+        if (typeof value !== 'string') continue
+
         rules.push(
           atRule('@utility', `content-${key}`, [
             decl('--tw-content', `${value}`),

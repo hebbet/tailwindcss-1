@@ -24,9 +24,22 @@ test('creates custom utilities to represent content keys', async () => {
   })
 
   expect(compiler.build(['content-slash'])).toMatchInlineSnapshot(`
-    ".content-slash {
+    "@layer properties;
+    .content-slash {
       --tw-content: "/";
       content: var(--tw-content);
+    }
+    @property --tw-content {
+      syntax: "*";
+      inherits: false;
+      initial-value: "";
+    }
+    @layer properties {
+      @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+        *, ::before, ::after, ::backdrop {
+          --tw-content: "";
+        }
+      }
     }
     "
   `)

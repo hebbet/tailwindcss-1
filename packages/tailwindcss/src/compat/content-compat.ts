@@ -1,4 +1,4 @@
-import { decl } from '../ast'
+import { atRoot, atRule, decl } from '../ast'
 import type { DesignSystem } from '../design-system'
 import type { ResolvedConfig } from './config/types'
 
@@ -13,6 +13,14 @@ export function registerContentCompat(userConfig: ResolvedConfig, designSystem: 
     designSystem.utilities.static(`content-${key}`, () => [
       decl('--tw-content', value),
       decl('content', 'var(--tw-content)'),
+
+      atRoot([
+        atRule('@property', `--tw-content`, [
+          decl('syntax', '"*"'),
+          decl('inherits', 'false'),
+          decl('initial-value', '""'),
+        ]),
+      ]),
     ])
   }
 }

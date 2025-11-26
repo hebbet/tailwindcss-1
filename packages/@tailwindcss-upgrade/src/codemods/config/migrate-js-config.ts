@@ -158,7 +158,14 @@ async function migrateTheme(
 
       if (rules.length > 0) {
         css += `\n@tw-bucket utility {\n`
-        css += toCss(rules)
+        css += toCss([
+          ...rules,
+          atRule('@property', `--tw-content`, [
+            decl('syntax', '"*"'),
+            decl('inherits', 'false'),
+            decl('initial-value', '""'),
+          ]),
+        ])
         css += '}\n' // @tw-bucket
       }
 
